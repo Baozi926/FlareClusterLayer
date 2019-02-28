@@ -9,6 +9,8 @@ declare namespace __esriExtend {
 
     export const GFXObject: any;
     export const Projector: any;
+    export const RenderingCore2D: any;
+    export const TextureManager: any;
 }
 
 
@@ -20,6 +22,18 @@ declare module "esri/views/2d/engine/graphics/GFXObject" {
 declare module "esri/views/2d/engine/graphics/Projector" {
     import Projector = __esriExtend.Projector;
     export = Projector;
+}
+
+
+declare module "esri/views/2d/RenderingCore2D" {
+    import RenderingCore2D = __esriExtend.RenderingCore2D;
+    export = RenderingCore2D;
+}
+
+
+declare module "esri/views/2d/engine/webgl/TextureManager" {
+    import TextureManager = __esriExtend.TextureManager;
+    export = TextureManager;
 }
 
 //declare module "dojox/gfx" {

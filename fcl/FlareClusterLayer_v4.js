@@ -21,7 +21,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-define(["require", "exports", "esri/layers/GraphicsLayer", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/TextSymbol", "esri/symbols/SimpleLineSymbol", "esri/Color", "esri/core/watchUtils", "esri/geometry/support/webMercatorUtils", "esri/Graphic", "esri/geometry/Point", "esri/geometry/Multipoint", "esri/geometry/Polygon", "esri/geometry/geometryEngine", "esri/geometry/SpatialReference", "esri/views/2d/engine/graphics/GFXObject", "esri/views/2d/engine/graphics/Projector", "esri/core/accessorSupport/decorators", "dojo/on", "dojox/gfx", "dojo/dom-construct", "dojo/query", "dojo/dom-attr", "dojo/dom-style"], function (require, exports, GraphicsLayer, SimpleMarkerSymbol, TextSymbol, SimpleLineSymbol, Color, watchUtils, webMercatorUtils, Graphic, Point, Multipoint, Polygon, geometryEngine, SpatialReference, GFXObject, Projector, asd, on, gfx, domConstruct, query, domAttr, domStyle) {
+define(["require", "exports", "esri/layers/GraphicsLayer", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/TextSymbol", "esri/symbols/SimpleLineSymbol", "esri/Color", "esri/core/watchUtils", "esri/geometry/support/webMercatorUtils", "esri/Graphic", "esri/geometry/Point", "esri/geometry/Multipoint", "esri/geometry/Polygon", "esri/geometry/geometryEngine", "esri/geometry/SpatialReference", "esri/views/2d/engine/webgl/TextureManager", "esri/core/accessorSupport/decorators", "dojo/on", "dojox/gfx", "dojo/dom-construct", "dojo/query", "dojo/dom-attr", "dojo/dom-style"], function (require, exports, GraphicsLayer, SimpleMarkerSymbol, TextSymbol, SimpleLineSymbol, Color, watchUtils, webMercatorUtils, Graphic, Point, Multipoint, Polygon, geometryEngine, SpatialReference, TextureManager, asd, on, gfx, domConstruct, query, domAttr, domStyle) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var FlareClusterLayer = /** @class */ (function (_super) {
@@ -127,15 +127,15 @@ define(["require", "exports", "esri/layers/GraphicsLayer", "esri/symbols/SimpleM
             var _this = this;
             var v = layerView.view;
             if (!v.fclPointerMove) {
-                var container = undefined;
-                if (v.type === "2d") {
-                    // for a map view get the container element of the layer view to add mousemove event to.
-                    container = layerView.container.element;
-                }
-                else {
-                    // for scene view get the canvas element under the view container to add mousemove to.
-                    container = query("canvas", v.container)[0];
-                }
+                //let container: HTMLElement = undefined;
+                //if (v.type === "2d") {
+                //    // for a map view get the container element of the layer view to add mousemove event to.
+                //    container = layerView.container.element;
+                //}
+                //else {
+                //    // for scene view get the canvas element under the view container to add mousemove to.
+                //    container = <HTMLElement>query("canvas", v.container)[0];
+                //}
                 // Add pointer move and pointer down. Pointer down to handle touch devices.
                 v.fclPointerMove = v.on("pointer-move", function (evt) { return _this._viewPointerMove(evt); });
                 v.fclPointerDown = v.on("pointer-down", function (evt) { return _this._viewPointerMove(evt); });
@@ -446,20 +446,34 @@ define(["require", "exports", "esri/layers/GraphicsLayer", "esri/symbols/SimpleM
          * @param view
          */
         FlareClusterLayer.prototype._createSurface = function () {
-            if (this._activeView.fclSurface || (this._activeView.type === "2d" && !this._layerView2d.container.element))
+            //if (this._activeView.fclSurface || (this._activeView.type === "2d" && !this._layerView2d.container.element)) return;
+            if (this._activeView.fclSurface)
                 return;
             var surfaceParentElement = undefined;
             if (this._is2d) {
-                surfaceParentElement = this._layerView2d.container.element.parentElement || this._layerView2d.container.element.parentNode;
+                //surfaceParentElement = this._layerView2d.container.element.parentElement || this._layerView2d.container.element.parentNode;
+                surfaceParentElement = this._activeView.container;
             }
             else {
-                surfaceParentElement = this._activeView.canvas.parentElement || this._activeView.canvas.parentNode;
+                //surfaceParentElement = this._activeView.canvas.parentElement || this._activeView.canvas.parentNode;
+                surfaceParentElement = this._activeView.container;
             }
             var surface = gfx.createSurface(surfaceParentElement, "0", "0");
             surface.containerGroup = surface.createGroup();
             domStyle.set(surface.rawNode, { position: "absolute", top: "0", zIndex: -1 });
             domAttr.set(surface.rawNode, "overflow", "visible");
             domAttr.set(surface.rawNode, "class", "fcl-surface");
+            var canvas = document.createElement("canvas");
+            canvas.height = 200;
+            canvas.width = 200;
+            canvas.style.position = "absolute";
+            canvas.style.top = "100px";
+            canvas.style.left = "100px";
+            canvas.id = "test-canvas";
+            var context = canvas.getContext("2d");
+            this._activeView.container.appendChild(canvas);
+            surface.canvas = canvas;
+            surface.testcontext = context;
             this._activeView.fclSurface = surface;
         };
         FlareClusterLayer.prototype._viewPointerMove = function (evt) {
@@ -772,16 +786,27 @@ define(["require", "exports", "esri/layers/GraphicsLayer", "esri/symbols/SimpleM
         };
         // #region helper functions
         FlareClusterLayer.prototype._createClonedElementFromGraphic = function (graphic, surface) {
+            var tm = new TextureManager();
+            var f = tm;
+            var d = tm._rasterizeJSON(graphic.symbol.toJSON());
+            var ctx = this._activeView.fclSurface.testcontext;
+            var img = ctx.createImageData(d.size[0], d.size[1]);
+            img.data.set(d.image);
+            ctx.putImageData(img, 0, 0);
+            return undefined;
+            /*
             // fake out a GFXObject so we can generate an svg shape that the passed in graphics shape
-            var g = new GFXObject();
+            let g = new GFXObject();
             g.graphic = graphic;
             g.renderingInfo = { symbol: graphic.symbol };
+    
             // set up parameters for the call to render
             // set the transform of the projector to 0's as we're just placing the generated cluster shape at exactly 0,0.
-            var projector = new Projector();
+            let projector = new Projector();
             projector._transform = [0, 0, 0, 0, 0, 0];
             projector._resolution = 0;
-            var state = undefined;
+    
+            let state = undefined;
             if (this._is2d) {
                 state = this._activeView.state;
             }
@@ -794,17 +819,22 @@ define(["require", "exports", "esri/layers/GraphicsLayer", "esri/symbols/SimpleM
                     worldScreenWidth: 1
                 };
             }
-            var par = {
+    
+            let par = {
                 surface: surface,
                 state: state,
                 projector: projector
             };
+    
             g.doRender(par);
+    
             // need to fix up the transform of the new shape. Text symbols seem to get a bit out of whack.
-            var yoffset = graphic.symbol["yoffset"] ? graphic.symbol["yoffset"] * -1 : 0;
-            var xoffset = graphic.symbol["xoffset"] ? graphic.symbol["xoffset"] * -1 : 0;
+            let yoffset = graphic.symbol["yoffset"] ? graphic.symbol["yoffset"] * -1 : 0;
+            let xoffset = graphic.symbol["xoffset"] ? graphic.symbol["xoffset"] * -1 : 0;
             g._shape.setTransform({ xx: 1, yy: 1, dy: yoffset, dx: xoffset });
+    
             return g._shape.rawNode;
+            */
         };
         FlareClusterLayer.prototype._extent = function () {
             return this._activeView ? this._activeView.extent : undefined;

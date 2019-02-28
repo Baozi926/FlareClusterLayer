@@ -21,9 +21,12 @@ import * as Extent from "esri/geometry/Extent";
 import * as MapView from 'esri/views/MapView';
 import * as SceneView from 'esri/views/SceneView';
  
-import * as GFXObject from "esri/views/2d/engine/graphics/GFXObject";
-import * as Projector from "esri/views/2d/engine/graphics/Projector";
- 
+//import * as GFXObject from "esri/views/2d/engine/graphics/GFXObject";
+//import * as Projector from "esri/views/2d/engine/graphics/Projector";
+
+import * as RenderingCore2D from "esri/views/2d/RenderingCore2D";
+import * as TextureManager from "esri/views/2d/engine/webgl/TextureManager";
+
 import * as asd from "esri/core/accessorSupport/decorators";
 
 import * as on from 'dojo/on';
@@ -249,15 +252,15 @@ export class FlareClusterLayer extends asd.declared(GraphicsLayer) {
         let v: ActiveView = layerView.view;
         if (!v.fclPointerMove) {
 
-            let container: HTMLElement = undefined;
-            if (v.type === "2d") {
-                // for a map view get the container element of the layer view to add mousemove event to.
-                container = layerView.container.element;
-            }
-            else {
-                // for scene view get the canvas element under the view container to add mousemove to.
-                container = <HTMLElement>query("canvas", v.container)[0];
-            }
+            //let container: HTMLElement = undefined;
+            //if (v.type === "2d") {
+            //    // for a map view get the container element of the layer view to add mousemove event to.
+            //    container = layerView.container.element;
+            //}
+            //else {
+            //    // for scene view get the canvas element under the view container to add mousemove to.
+            //    container = <HTMLElement>query("canvas", v.container)[0];
+            //}
 
             // Add pointer move and pointer down. Pointer down to handle touch devices.
             v.fclPointerMove = v.on("pointer-move", (evt) => this._viewPointerMove(evt));
@@ -639,13 +642,16 @@ export class FlareClusterLayer extends asd.declared(GraphicsLayer) {
      */
     private _createSurface() {
 
-        if (this._activeView.fclSurface || (this._activeView.type === "2d" && !this._layerView2d.container.element)) return;
+        //if (this._activeView.fclSurface || (this._activeView.type === "2d" && !this._layerView2d.container.element)) return;
+        if (this._activeView.fclSurface) return;
         let surfaceParentElement = undefined;
         if (this._is2d) {
-            surfaceParentElement = this._layerView2d.container.element.parentElement || this._layerView2d.container.element.parentNode;
+            //surfaceParentElement = this._layerView2d.container.element.parentElement || this._layerView2d.container.element.parentNode;
+            surfaceParentElement = this._activeView.container;
         }
         else {
-            surfaceParentElement = this._activeView.canvas.parentElement || this._activeView.canvas.parentNode;
+            //surfaceParentElement = this._activeView.canvas.parentElement || this._activeView.canvas.parentNode;
+            surfaceParentElement = this._activeView.container;
         }
 
         let surface: any = gfx.createSurface(surfaceParentElement, "0", "0");
@@ -654,6 +660,20 @@ export class FlareClusterLayer extends asd.declared(GraphicsLayer) {
         domStyle.set(surface.rawNode, { position: "absolute", top: "0", zIndex: -1 });
         domAttr.set(surface.rawNode, "overflow", "visible");
         domAttr.set(surface.rawNode, "class", "fcl-surface");
+
+
+        let canvas: HTMLCanvasElement = document.createElement("canvas");
+        canvas.height = 200;
+        canvas.width = 200;
+        canvas.style.position = "absolute";
+        canvas.style.top = "100px";
+        canvas.style.left = "100px";
+        canvas.id = "test-canvas";
+        let context = canvas.getContext("2d");
+        this._activeView.container.appendChild(canvas);
+        surface.canvas = canvas;
+        surface.testcontext = context;
+
         this._activeView.fclSurface = surface;
 
     }
@@ -1048,6 +1068,18 @@ export class FlareClusterLayer extends asd.declared(GraphicsLayer) {
 
     private _createClonedElementFromGraphic(graphic: Graphic, surface: any): HTMLElement {
 
+        let tm = new TextureManager();
+        let f = tm;
+        var d = tm._rasterizeJSON(graphic.symbol.toJSON());
+
+        let ctx = this._activeView.fclSurface.testcontext;
+        let img = ctx.createImageData(d.size[0], d.size[1]);
+        img.data.set(d.image);
+        ctx.putImageData(img, 0, 0);
+
+        return undefined;
+
+        /*
         // fake out a GFXObject so we can generate an svg shape that the passed in graphics shape
         let g = new GFXObject();
         g.graphic = graphic;
@@ -1087,6 +1119,8 @@ export class FlareClusterLayer extends asd.declared(GraphicsLayer) {
         g._shape.setTransform({ xx: 1, yy: 1, dy: yoffset, dx: xoffset });
 
         return g._shape.rawNode;
+        */
+
     }
 
 
