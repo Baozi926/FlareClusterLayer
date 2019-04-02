@@ -21,7 +21,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-define(["require", "exports", "esri/layers/GraphicsLayer", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/TextSymbol", "esri/symbols/SimpleLineSymbol", "esri/Color", "esri/core/watchUtils", "esri/geometry/support/webMercatorUtils", "esri/Graphic", "esri/geometry/Point", "esri/geometry/Multipoint", "esri/geometry/Polygon", "esri/geometry/geometryEngine", "esri/geometry/SpatialReference", "esri/views/2d/engine/webgl/TextureManager", "esri/core/accessorSupport/decorators", "dojo/on", "dojox/gfx", "dojo/dom-construct", "dojo/query", "dojo/dom-attr", "dojo/dom-style"], function (require, exports, GraphicsLayer, SimpleMarkerSymbol, TextSymbol, SimpleLineSymbol, Color, watchUtils, webMercatorUtils, Graphic, Point, Multipoint, Polygon, geometryEngine, SpatialReference, TextureManager, asd, on, gfx, domConstruct, query, domAttr, domStyle) {
+define(["require", "exports", "esri/layers/GraphicsLayer", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/TextSymbol", "esri/symbols/SimpleLineSymbol", "esri/Color", "esri/core/watchUtils", "esri/geometry/support/webMercatorUtils", "esri/Graphic", "esri/geometry/Point", "esri/geometry/Multipoint", "esri/geometry/Polygon", "esri/geometry/geometryEngine", "esri/geometry/SpatialReference", "esri/core/accessorSupport/decorators", "dojo/on", "dojox/gfx", "dojo/dom-construct", "dojo/query", "dojo/dom-attr", "dojo/dom-style"], function (require, exports, GraphicsLayer, SimpleMarkerSymbol, TextSymbol, SimpleLineSymbol, Color, watchUtils, webMercatorUtils, Graphic, Point, Multipoint, Polygon, geometryEngine, SpatialReference, asd, on, gfx, domConstruct, query, domAttr, domStyle) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var FlareClusterLayer = /** @class */ (function (_super) {
@@ -581,16 +581,21 @@ define(["require", "exports", "esri/layers/GraphicsLayer", "esri/symbols/SimpleM
             this._activeCluster.clusterGroup = surface.containerGroup.createGroup();
             this._addClassToElement(this._activeCluster.clusterGroup.rawNode, "cluster-group");
             // create the cluster shape
-            var clonedClusterElement = this._createClonedElementFromGraphic(this._activeCluster.clusterGraphic, this._activeCluster.clusterGroup);
+            /*
+            let clonedClusterElement = this._createClonedElementFromGraphic(this._activeCluster.clusterGraphic, this._activeCluster.clusterGroup);
             this._addClassToElement(clonedClusterElement, "cluster");
+    
             // create the cluster text shape
-            var clonedTextElement = this._createClonedElementFromGraphic(this._activeCluster.textGraphic, this._activeCluster.clusterGroup);
+            let clonedTextElement = this._createClonedElementFromGraphic(this._activeCluster.textGraphic, this._activeCluster.clusterGroup);
             this._addClassToElement(clonedTextElement, "cluster-text");
             clonedTextElement.setAttribute("pointer-events", "none");
+    
             this._activeCluster.clusterGroup.rawNode.appendChild(clonedClusterElement);
             this._activeCluster.clusterGroup.rawNode.appendChild(clonedTextElement);
-            // set the group elements class     
+    
+            // set the group elements class
             this._addClassToElement(this._activeCluster.clusterGroup.rawNode, "activated", 10);
+            */
         };
         FlareClusterLayer.prototype._initFlares = function () {
             var _this = this;
@@ -786,14 +791,24 @@ define(["require", "exports", "esri/layers/GraphicsLayer", "esri/symbols/SimpleM
         };
         // #region helper functions
         FlareClusterLayer.prototype._createClonedElementFromGraphic = function (graphic, surface) {
-            var tm = new TextureManager();
-            var f = tm;
+            return undefined;
+            /*
+            let tm = new TextureManager();
+            let f = tm;
             var d = tm._rasterizeJSON(graphic.symbol.toJSON());
-            var ctx = this._activeView.fclSurface.testcontext;
-            var img = ctx.createImageData(d.size[0], d.size[1]);
+    
+            //let cim = new CIMSymbolHelper();
+           // let d = CIMSymbolHelper.CIMSymbolHelper.fromSimpleMarker(graphic.symbol);
+            //this._activeView.fclSurface.testcontext;
+            let ctx = this._activeView.fclSurface.testcontext;
+            ctx.clearRect(0, 0, 100, 100);
+            let img = ctx.createImageData(d.size[0], d.size[1]);
             img.data.set(d.image);
             ctx.putImageData(img, 0, 0);
+    
             return undefined;
+    
+            */
             /*
             // fake out a GFXObject so we can generate an svg shape that the passed in graphics shape
             let g = new GFXObject();

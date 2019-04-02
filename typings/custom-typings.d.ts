@@ -11,6 +11,7 @@ declare namespace __esriExtend {
     export const Projector: any;
     export const RenderingCore2D: any;
     export const TextureManager: any;
+    export const CIMSymbolHelper: any;
 }
 
 
@@ -34,6 +35,11 @@ declare module "esri/views/2d/RenderingCore2D" {
 declare module "esri/views/2d/engine/webgl/TextureManager" {
     import TextureManager = __esriExtend.TextureManager;
     export = TextureManager;
+}
+
+declare module "esri/views/2d/engine/webgl/CIMSymbolHelper" {
+    import CIMSymbolHelper = __esriExtend.CIMSymbolHelper;
+    export = CIMSymbolHelper;
 }
 
 //declare module "dojox/gfx" {

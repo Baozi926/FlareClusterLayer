@@ -26,6 +26,7 @@ import * as SceneView from 'esri/views/SceneView';
 
 import * as RenderingCore2D from "esri/views/2d/RenderingCore2D";
 import * as TextureManager from "esri/views/2d/engine/webgl/TextureManager";
+import * as CIMSymbolHelper from "esri/views/2d/engine/webgl/CIMSymbolHelper";
 
 import * as asd from "esri/core/accessorSupport/decorators";
 
@@ -670,6 +671,7 @@ export class FlareClusterLayer extends asd.declared(GraphicsLayer) {
         canvas.style.left = "100px";
         canvas.id = "test-canvas";
         let context = canvas.getContext("2d");
+
         this._activeView.container.appendChild(canvas);
         surface.canvas = canvas;
         surface.testcontext = context;
@@ -789,7 +791,7 @@ export class FlareClusterLayer extends asd.declared(GraphicsLayer) {
 
     }
 
-    private _clearSurface() {
+    private _clearSurface() { 
         let surface = this._activeView.fclSurface;
         query(".cluster-group", surface.containerGroup.rawNode).forEach(domConstruct.destroy);
         domStyle.set(surface.rawNode, { zIndex: -1, overflow: "hidden", top: "0px", left: "0px" });
@@ -806,6 +808,7 @@ export class FlareClusterLayer extends asd.declared(GraphicsLayer) {
         this._addClassToElement(this._activeCluster.clusterGroup.rawNode, "cluster-group");
 
         // create the cluster shape
+        /*
         let clonedClusterElement = this._createClonedElementFromGraphic(this._activeCluster.clusterGraphic, this._activeCluster.clusterGroup);
         this._addClassToElement(clonedClusterElement, "cluster");
 
@@ -819,7 +822,7 @@ export class FlareClusterLayer extends asd.declared(GraphicsLayer) {
 
         // set the group elements class     
         this._addClassToElement(this._activeCluster.clusterGroup.rawNode, "activated", 10);
-
+        */ 
     }
 
 
@@ -1068,16 +1071,25 @@ export class FlareClusterLayer extends asd.declared(GraphicsLayer) {
 
     private _createClonedElementFromGraphic(graphic: Graphic, surface: any): HTMLElement {
 
+        return undefined;
+
+        /*
         let tm = new TextureManager();
         let f = tm;
         var d = tm._rasterizeJSON(graphic.symbol.toJSON());
 
+        //let cim = new CIMSymbolHelper();
+       // let d = CIMSymbolHelper.CIMSymbolHelper.fromSimpleMarker(graphic.symbol);
+        //this._activeView.fclSurface.testcontext;
         let ctx = this._activeView.fclSurface.testcontext;
+        ctx.clearRect(0, 0, 100, 100);
         let img = ctx.createImageData(d.size[0], d.size[1]);
         img.data.set(d.image);
         ctx.putImageData(img, 0, 0);
 
         return undefined;
+
+        */
 
         /*
         // fake out a GFXObject so we can generate an svg shape that the passed in graphics shape
