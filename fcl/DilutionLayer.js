@@ -78,16 +78,6 @@ define(["require", "exports", "esri/layers/GraphicsLayer", "esri/symbols/SimpleM
                             width: 1
                         })
                     });
-            _this.labelSymbol =
-                options.labelSymbol ||
-                    new TextSymbol({
-                        color: new Color([255, 255, 255]),
-                        font: {
-                            size: 10,
-                            family: "arial"
-                        },
-                        yoffset: -3 // setting yoffset as vertical alignment doesn't work in IE/Edge
-                    });
             _this.textSymbol =
                 options.textSymbol ||
                     new TextSymbol({
@@ -110,9 +100,9 @@ define(["require", "exports", "esri/layers/GraphicsLayer", "esri/symbols/SimpleM
                     });
             // initial data
             if (options.url) {
-                _this._createFromService(options.url).then(function () {
-                    console.log("data init from service");
-                });
+                _this._createFromService(options.url).then(function () { return [
+                    console.log("data init")
+                ]; });
             }
             else {
                 _this._data = options.data || undefined;
@@ -127,15 +117,11 @@ define(["require", "exports", "esri/layers/GraphicsLayer", "esri/symbols/SimpleM
             var _this = this;
             var dfd = new Deferer();
             var _self = this;
-            var queryIdsUrl = url + "/query";
+            var queryIdsUrl = url +
+                "/query?where=1%3D1&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&distance=&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&having=&gdbVersion=&historicMoment=&returnDistinctValues=false&returnIdsOnly=true&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=xyFootprint&returnTrueCurves=false&returnExceededLimitFeatures=false&quantizationParameters=&returnCentroid=false&sqlFormat=none&resultType=&f=json";
             var ids;
             esriRequest(queryIdsUrl, {
-                responseType: "json",
-                query: {
-                    f: "json",
-                    where: "1=1",
-                    returnIdsOnly: true
-                }
+                responseType: "json"
             }).then(function (response) {
                 // The requested data
                 ids = response.data.objectIds;
@@ -268,10 +254,10 @@ define(["require", "exports", "esri/layers/GraphicsLayer", "esri/symbols/SimpleM
             if (!this._activeView || !this._data || !currentExtent)
                 return;
             this._is2d = this._activeView.type === "2d";
-            // // check for required renderer
-            // if (!this.clusterRenderer) {
-            //   console.error("FlareClusterLayer: clusterRenderer must be set.");
-            // }
+            // check for required renderer
+            if (!this.clusterRenderer) {
+                console.error("FlareClusterLayer: clusterRenderer must be set.");
+            }
             // check to make sure we have an area renderer set if one needs to be
             if (this.clusterAreaDisplay && !this.areaRenderer) {
                 console.error("FlareClusterLayer: areaRenderer must be set if clusterAreaDisplay is set.");
@@ -529,13 +515,6 @@ define(["require", "exports", "esri/layers/GraphicsLayer", "esri/symbols/SimpleM
             }
             this.add(cluster.clusterGraphic);
             // this.add(cluster.textGraphic);
-            if (this.labelField && this.labelSymbol) {
-                cluster.labelGraphic = cluster.clusterGraphic.clone();
-                var labelSymbol = this.labelSymbol.clone();
-                labelSymbol.text = randomPointInfo[this.labelField];
-                cluster.labelGraphic.symbol = labelSymbol;
-                this.add(cluster.labelGraphic);
-            }
             this._clusters[cluster.clusterId] = cluster;
         };
         FlareClusterLayer.prototype._createClusterGrid = function (webExtent, extentIsUnioned) {
